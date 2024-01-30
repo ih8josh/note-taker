@@ -1,10 +1,12 @@
 const router = require('express').Router();
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs').promises; // Use fs.promises for async/await operations
+const fs = require('fs').promises;
+
+const dataFilePath = 'db/db.json';
 
 const readDataFromFile = async () => {
   try {
-    const data = await fs.readFile('db/db.json', 'utf8');
+    const data = await fs.readFile(dataFilePath, 'utf8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Error reading file:', error.message);
@@ -14,14 +16,13 @@ const readDataFromFile = async () => {
 
 const writeDataToFile = async (data) => {
   try {
-    await fs.writeFile('db/db.json', JSON.stringify(data));
+    await fs.writeFile(dataFilePath, JSON.stringify(data));
   } catch (error) {
     console.error('Error writing file:', error.message);
     throw error;
   }
 };
 
-// Defines the GET request to this route's endpoint '/api/notes'
 router.get('/api/notes', async (req, res) => {
   try {
     const dbJson = await readDataFromFile();
@@ -31,16 +32,15 @@ router.get('/api/notes', async (req, res) => {
   }
 });
 
-// Defines the POST request to this route's endpoint '/api/notes'
 router.post('/api/notes', async (req, res) => {
   try {
     const dbJson = await readDataFromFile();
-    const newFeedback = {
+    const newNote = {
       title: req.body.title,
       text: req.body.text,
       id: uuidv4(),
     };
-    dbJson.push(newFeedback);
+    dbJson.push(newNote);
     await writeDataToFile(dbJson);
     res.json(dbJson);
   } catch (error) {
@@ -53,7 +53,7 @@ router.delete('/api/notes/:id', async (req, res) => {
     const dataJSON = await readDataFromFile();
     const newNotes = dataJSON.filter((note) => note.id !== req.params.id);
     await writeDataToFile(newNotes);
-    res.json('Note deleted.');
+    res.json({ message: 'Note deleted successfully.' });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
