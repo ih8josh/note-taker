@@ -32,7 +32,7 @@ router.get('/api/notes', async (req, res) => {
   }
 });
 
-router.post('/api/notes', async (req, res) => {
+router.post('./api', async (req, res) => {
   try {
     const dbJson = await readDataFromFile();
     const newNote = {
